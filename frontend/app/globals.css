@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — W3C DTCG 2025.10 形式 / shadcn v4 @theme inline 方式
+ * (CLAUDE.md §10.1)
+ *
+ * shadcn v4 のパターンに従い :root で primitive を実体定義し、@theme inline で
+ * Tailwind 側に semantic 名でエクスポーズする。:root に置くことで Tailwind が
+ * tree-shake しても var(--color-*) を実体参照する inline style が常に解決する。
+ *
+ * Day 1 では §10.1 表の semantic 名のみ確定させ、primitive 値は
+ * mockup/styles/forge.css から継承した暫定値を入れている。
+ * 5視点・letter・draft の最終 primitive 値はチーム合意のうえ
+ * 要件定義書に追記してから固定する (Day 3 タスク)。
+ */
+:root {
+  /* === 5視点 (Five Voices) === */
+  --color-agent-gyosei: #60a5fa;
+  --color-agent-kankyo: #2dd4bf;
+  --color-agent-kigyo: #fbbf24;
+  --color-agent-seikatsu: #ff6b35;
+  --color-agent-jisedai: #a7f3d0;
+
+  /* === 2050年からの手紙 === */
+  --color-letter-future: #cffae7;
+
+  /* === 草案 v1 / v2 (主役) === */
+  --color-draft-v1: #94a3b8;
+  --color-draft-v2: #ff6b35;
+
+  /* === diff highlight (changes_from_letter) === */
+  --color-diff-added: #ff6b35;
+
+  /* === Source 4-tier badges (forge.css 由来で確定) === */
+  --color-source-official: #60a5fa;
+  --color-source-open: #2dd4bf;
+  --color-source-hypothesis: #fbbf24;
+  --color-source-claim: #ff6b35;
+
+  /* === Background / foreground === */
+  --color-bg: #0b1020;
+  --color-fg: #f8fafc;
+  --color-fg-muted: rgba(248, 250, 252, 0.55);
+  --color-line: rgba(248, 250, 252, 0.12);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-agent-gyosei: var(--color-agent-gyosei);
+  --color-agent-kankyo: var(--color-agent-kankyo);
+  --color-agent-kigyo: var(--color-agent-kigyo);
+  --color-agent-seikatsu: var(--color-agent-seikatsu);
+  --color-agent-jisedai: var(--color-agent-jisedai);
+
+  --color-letter-future: var(--color-letter-future);
+  --color-draft-v1: var(--color-draft-v1);
+  --color-draft-v2: var(--color-draft-v2);
+  --color-diff-added: var(--color-diff-added);
+
+  --color-source-official: var(--color-source-official);
+  --color-source-open: var(--color-source-open);
+  --color-source-hypothesis: var(--color-source-hypothesis);
+  --color-source-claim: var(--color-source-claim);
+
+  --color-bg: var(--color-bg);
+  --color-fg: var(--color-fg);
+  --color-fg-muted: var(--color-fg-muted);
+  --color-line: var(--color-line);
+
+  --font-sans:
+    var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  --font-serif: var(--font-noto-serif-jp), "Yu Mincho", "YuMincho", serif;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "palt";
+  letter-spacing: 0.01em;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
