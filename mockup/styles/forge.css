@@ -16,6 +16,13 @@
   --forge-line-strong: rgba(248, 250, 252, 0.22);
   --forge-muted: rgba(248, 250, 252, 0.55);
   --forge-muted-2: rgba(248, 250, 252, 0.7);
+
+  /* §10.1 semantic — Five Voices (1:1 with primitive) */
+  --agent-gyosei: var(--forge-blue);
+  --agent-kankyo: var(--forge-green);
+  --agent-kigyo: var(--forge-amber);
+  --agent-seikatsu: var(--forge-orange);
+  --agent-jisedai: var(--forge-cyan);
 }
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -391,6 +398,11 @@ body {
   border: 1px solid rgba(255,107,53,0.3);
   color: var(--forge-orange);
 }
+.agent-icon[data-agent-id="admin"]    { background: rgba(96,165,250,0.10); border-color: rgba(96,165,250,0.30); color: var(--agent-gyosei); }
+.agent-icon[data-agent-id="env"]      { background: rgba(45,212,191,0.10); border-color: rgba(45,212,191,0.30); color: var(--agent-kankyo); }
+.agent-icon[data-agent-id="biz"]      { background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.30); color: var(--agent-kigyo); }
+.agent-icon[data-agent-id="citizen"]  { background: rgba(255,107,53,0.10); border-color: rgba(255,107,53,0.30); color: var(--agent-seikatsu); }
+.agent-icon[data-agent-id="next_gen"] { background: rgba(167,243,208,0.10); border-color: rgba(167,243,208,0.30); color: var(--agent-jisedai); }
 .agent-name {
   font-weight: 700;
   font-size: 14px;

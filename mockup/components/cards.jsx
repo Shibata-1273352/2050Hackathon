@@ -56,7 +56,7 @@ function AgentCard({ agent, delay = 0 }) {
       }}
     >
       <div className="agent-head">
-        <div className="agent-icon"><AgentIcon id={agent.agent_id} /></div>
+        <div className="agent-icon" data-agent-id={agent.agent_id}><AgentIcon id={agent.agent_id} /></div>
         <div style={{flex:1, minWidth:0}}>
           <div className="agent-name">{agent.agent_name}</div>
           <div className="agent-sub">{agent.subtitle}</div>
