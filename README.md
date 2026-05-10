@@ -219,7 +219,7 @@ AI は、市民協議の出発点をつくる。
 mockup/index.html
 ```
 
-GitHub Pages にも配信予定: <https://shibata-1273352.github.io/2050Hackathon/> (リポジトリ Settings → Pages で `main` / `/mockup` を選択して有効化)
+GitHub Pages にも配信予定: <https://shibata-1273352.github.io/2050Hackathon/> (`.github/workflows/pages-mockup.yml` で自動デプロイ。初回のみ Settings → Pages → Source を **GitHub Actions** に切替)
 
 操作:
 

@@ -1,0 +1,43 @@
+name: Deploy mockup to GitHub Pages
+
+# mockup/ を GitHub Pages 配信ルートとして公開する。
+# branch 配信は /(root) と /docs しか選べないため Actions 経由にしている。
+# 初回のみリポジトリ Settings → Pages で Source を「GitHub Actions」に
+# 切り替える必要がある (Branch ではなく Actions を選ぶ)。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mockup/**"
+      - ".github/workflows/pages-mockup.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: mockup
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
