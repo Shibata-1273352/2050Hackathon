@@ -194,7 +194,7 @@ AI は、市民協議の出発点をつくる。
 
 | パス | 内容 |
 |---|---|
-| `mockup/Mirai Forge.html` | 1ページ完結の静的プロトタイプ(審査・ピッチ用) |
+| `mockup/index.html` | 1ページ完結の静的プロトタイプ(審査・ピッチ用 / GitHub Pages 配信) |
 | `mockup/app.jsx` | シーン進行、テンポ、語り手切替 |
 | `mockup/data/seed.js` | cached demo seed(5視点・手紙・草案 v1/v2) |
 | `mockup/components/` | シーン、カード、クローム UI |
@@ -216,8 +216,10 @@ AI は、市民協議の出発点をつくる。
 ブラウザで以下を直接開きます。
 
 ```text
-mockup/Mirai Forge.html
+mockup/index.html
 ```
+
+GitHub Pages にも配信予定: <https://shibata-1273352.github.io/2050Hackathon/> (リポジトリ Settings → Pages で `main` / `/mockup` を選択して有効化)
 
 操作:
 

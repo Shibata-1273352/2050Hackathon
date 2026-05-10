@@ -54,7 +54,7 @@
 
 | 領域 | 状態 |
 |---|---|
-| `mockup/Mirai Forge.html` (静的プロトタイプ) | ✅ 存在 |
+| `mockup/index.html` (静的プロトタイプ / GH Pages 配信) | ✅ 存在 |
 | `mockup/data/seed.js` (§13 反映済み) | ✅ 存在 |
 | `mockup/components/{cards,chrome,scenes}.jsx` | ✅ 存在 |
 | `mockup/styles/forge.css` | ✅ 存在 (Tailwind 化が次工程) |
