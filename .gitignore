@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Python / uv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.python-version.local
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Claude Code 実行時生成物 (settings.json と commands/ はコミット対象)
+.claude/.codex-gate-token
+.claude/projects/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/ide/
+
+# Logs & editor
+*.log
+.idea/
+.vscode/
+*.swp
