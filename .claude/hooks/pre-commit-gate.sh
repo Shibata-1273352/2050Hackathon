@@ -21,19 +21,51 @@ ROOT="/Users/shibata/Desktop/2050Hackathon"
 cd "$ROOT" || exit 2
 
 # --- 自己フィルタ: git commit でない Bash 呼び出しは即通過 ---
+# shlex で実際にトークン化し、各 pipeline segment ごとに「先頭トークン (env var
+# prefix を skip 後) が git で、続く非フラグトークンが commit か」を判定する。
+# これで `cd /x && git commit ...` / `git -C /x commit` / `GIT_AUTHOR=foo git commit`
+# / `/usr/bin/git commit` / `git --git-dir=/x commit` 等の bypass 形態を全て拾う。
+# QG_DRY_RUN=1 のときは stdin を読まず、現在 staged 内容に対して実行する。
 if [ "${QG_DRY_RUN:-0}" != "1" ]; then
   INPUT=$(cat)
-  CMD=$(printf '%s' "$INPUT" | python3 -c 'import json,sys
+  IS_COMMIT=$(printf '%s' "$INPUT" | python3 -c '
+import json, re, shlex, sys
 try:
-    d = json.load(sys.stdin)
-    print(d.get("tool_input", {}).get("command", ""))
+    cmd = json.load(sys.stdin).get("tool_input", {}).get("command", "")
 except Exception:
-    print("")
-' 2>/dev/null || true)
-  case "$CMD" in
-    "git commit"*) ;;          # gate 対象
-    *) exit 0 ;;                # その他は通過
-  esac
+    print("0"); sys.exit(0)
+ENV_VAR = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+GIT_OPTS_WITH_VAL = {"-C", "--git-dir", "--work-tree", "--namespace", "--super-prefix"}
+for seg in re.split(r"[;&|]+|\$\(|\)|`", cmd):
+    try:
+        toks = shlex.split(seg)
+    except ValueError:
+        continue
+    i = 0
+    while i < len(toks) and ENV_VAR.match(toks[i]):
+        i += 1
+    if i >= len(toks):
+        continue
+    head = toks[i]
+    if head != "git" and not head.endswith("/git"):
+        continue
+    j = i + 1
+    while j < len(toks):
+        t = toks[j]
+        if t in GIT_OPTS_WITH_VAL:
+            j += 2
+            continue
+        if t.startswith("-"):
+            j += 1
+            continue
+        break
+    if j < len(toks) and toks[j] == "commit":
+        print("1"); sys.exit(0)
+print("0")
+' 2>/dev/null || echo "0")
+  if [ "$IS_COMMIT" != "1" ]; then
+    exit 0
+  fi
 fi
 
 FAIL=0
