@@ -94,7 +94,7 @@ function Footer({ note }) {
     <div className="app-footer">
       <div className="principle">
         <span className="dot"/>
-        <span>AIは合意を決めない。AIは、合意の出発点をつくる。決めるのは、市民と行政である。</span>
+        <span>AIは決めない。AIは、市民協議の出発点をつくる。決めるのは、市民と行政である。</span>
       </div>
       <div>{note}</div>
     </div>

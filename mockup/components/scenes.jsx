@@ -311,8 +311,8 @@ function SceneClosing({ onRestart }) {
           letterSpacing: "0.08em",
           lineHeight: 2.2,
         }}>
-          AIは合意を決めない。<br/>
-          AIは、合意の出発点をつくる。<br/>
+          AIは決めない。<br/>
+          AIは、市民協議の出発点をつくる。<br/>
           決めるのは、市民と行政である。
         </div>
         <h2 className="serif" style={{
