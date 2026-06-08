@@ -225,7 +225,7 @@ window.SceneIssueMap = SceneIssueMap;
 // ─────────────────────────────────────────────────────────
 // SCENE 5: Letter
 // ─────────────────────────────────────────────────────────
-function SceneLetter({ letter, tempo }) {
+function SceneLetter({ letter, tempo, audioBlocked, onRetryAudio }) {
   return (
     <div className="stage scene-enter" style={{paddingTop:80}}>
       <div className="stage-narrow" style={{maxWidth:900, textAlign:"center"}}>
@@ -233,6 +233,11 @@ function SceneLetter({ letter, tempo }) {
         <h2 className="serif" style={{fontSize:24, margin:"6px 0 24px", color:"var(--forge-cyan)"}}>
           2050年の前橋市民から、手紙が届きました
         </h2>
+        {audioBlocked && (
+          <button className="letter-audio-retry" onClick={onRetryAudio}>
+            音声を再生
+          </button>
+        )}
         <FutureLetterCard letter={letter} tempo={tempo}/>
       </div>
     </div>

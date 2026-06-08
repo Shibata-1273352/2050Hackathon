@@ -37,6 +37,8 @@ const TEMPO_PROFILES = {
   contemplative:{ letterParaInterval: 3200, letterStart: 1000, inputStep: 700, scale: 1.6 },
 };
 
+const LETTER_AUDIO_SRC = "assets/letter-yukari.mp3";
+
 // Intensity profiles — applied as CSS variables on :root
 const INTENSITY_PROFILES = {
   quiet: {
@@ -66,6 +68,8 @@ function App() {
   const seed = window.MIRAI_SEED;
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [sceneIdx, setSceneIdx] = useState(0);
+  const [letterAudioBlocked, setLetterAudioBlocked] = useState(false);
+  const audioRef = useRef(null);
   const scene = SCENES[sceneIdx];
 
   // Apply intensity profile as CSS vars on :root
@@ -85,10 +89,50 @@ function App() {
   const letter = seed.letters[t.voice] || seed.letters.hanako;
   const draftV2 = seed.draftV2_by_voice[t.voice] || seed.draftV2_by_voice.hanako;
 
-  const go = (i) => setSceneIdx(Math.max(0, Math.min(SCENES.length - 1, i)));
-  const next = () => go(sceneIdx + 1);
-  const prev = () => go(sceneIdx - 1);
-  const restart = () => go(0);
+  const stopLetterAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setLetterAudioBlocked(false);
+  }, []);
+
+  const playLetterAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    audio.volume = 0.95;
+    setLetterAudioBlocked(false);
+
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise
+        .then(() => setLetterAudioBlocked(false))
+        .catch(() => setLetterAudioBlocked(true));
+    }
+  }, []);
+
+  const go = useCallback((i) => {
+    const nextIdx = Math.max(0, Math.min(SCENES.length - 1, i));
+    const nextScene = SCENES[nextIdx];
+    setSceneIdx(nextIdx);
+    if (nextScene.id === "letter") playLetterAudio();
+    else stopLetterAudio();
+  }, [playLetterAudio, stopLetterAudio]);
+
+  const next = useCallback(() => go(sceneIdx + 1), [go, sceneIdx]);
+  const prev = useCallback(() => go(sceneIdx - 1), [go, sceneIdx]);
+  const restart = useCallback(() => go(0), [go]);
+
+  useEffect(() => {
+    if (scene.id !== "letter") {
+      stopLetterAudio();
+      return;
+    }
+    const audio = audioRef.current;
+    if (audio && audio.paused) playLetterAudio();
+  }, [scene.id, playLetterAudio, stopLetterAudio]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -101,7 +145,7 @@ function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [sceneIdx]);
+  }, [next, prev, restart]);
 
   const renderScene = () => {
     switch (scene.id) {
@@ -110,7 +154,7 @@ function App() {
       case "input":   return <SceneInputData ctx={seed.context} data={seed.inputData} onContinue={next} tempo={tempo}/>;
       case "council": return <SceneCouncil agents={seed.agents} ctx={seed.context} tempo={tempo}/>;
       case "issue":   return <SceneIssueMap issueMap={seed.issueMap} agents={seed.agents}/>;
-      case "letter":  return <SceneLetter letter={letter} tempo={tempo}/>;
+      case "letter":  return <SceneLetter letter={letter} tempo={tempo} audioBlocked={letterAudioBlocked} onRetryAudio={playLetterAudio}/>;
       case "compare": return <SceneComparison v1={seed.draftV1} letter={letter} v2={draftV2}/>;
       case "accord":  return <SceneAccord v2={draftV2} letter={letter} ctx={seed.context}/>;
       case "closing": return <SceneClosing onRestart={restart}/>;
@@ -121,80 +165,83 @@ function App() {
   const showFab = !["opening"].includes(scene.id);
 
   return (
-    <div key={scene.id + t.voice + t.tempo} style={{position:"relative", minHeight:"100vh"}}>
-      <AkagiBackground intensity={t.intensity}/>
-      <Header stepKey={scene.step}/>
-      {renderScene()}
-      <Footer note={`MODE: cached  ·  ${String(sceneIdx+1).padStart(2,'0')}/${String(SCENES.length).padStart(2,'0')}  ${scene.label}  ·  ${t.intensity} / ${t.voice} / ${t.tempo}`}/>
+    <>
+      <audio ref={audioRef} src={LETTER_AUDIO_SRC} preload="auto"/>
+      <div key={scene.id + t.voice + t.tempo} style={{position:"relative", minHeight:"100vh"}}>
+        <AkagiBackground intensity={t.intensity}/>
+        <Header stepKey={scene.step}/>
+        {renderScene()}
+        <Footer note={`MODE: cached  ·  ${String(sceneIdx+1).padStart(2,'0')}/${String(SCENES.length).padStart(2,'0')}  ${scene.label}  ·  ${t.intensity} / ${t.voice} / ${t.tempo}`}/>
 
-      <div className="scene-skip">
-        <kbd>←</kbd><kbd>→</kbd>
-        <span>でシーン切替</span>
+        <div className="scene-skip">
+          <kbd>←</kbd><kbd>→</kbd>
+          <span>でシーン切替</span>
+        </div>
+
+        {showFab && (
+          <div className="nav-fab">
+            <button className="btn btn-ghost" onClick={prev} disabled={sceneIdx === 0}
+              style={{opacity: sceneIdx === 0 ? 0.4 : 1}}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M11 6H1M5 1L1 6l4 5" stroke="currentColor" strokeWidth="1.5"/></svg>
+              前へ
+            </button>
+            <button className="btn btn-primary" onClick={next} disabled={sceneIdx === SCENES.length - 1}
+              style={{opacity: sceneIdx === SCENES.length - 1 ? 0.4 : 1}}>
+              次のシーンへ
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M7 1l4 5-4 5" stroke="currentColor" strokeWidth="1.5"/></svg>
+            </button>
+          </div>
+        )}
+
+        <TweaksPanel>
+          <TweakSection label="Forge Intensity"/>
+          <div style={{fontSize:10.5, color:"rgba(41,38,27,.6)", lineHeight:1.5, marginBottom:4}}>
+            鍛冶場の熱量。火花密度・山稜の濃さ・赤橙のグロウを連動。
+          </div>
+          <TweakRadio
+            label="Heat"
+            value={t.intensity}
+            options={["quiet","balanced","blazing"]}
+            onChange={(v) => setTweak("intensity", v)}
+          />
+
+          <TweakSection label="2050年の語り手"/>
+          <div style={{fontSize:10.5, color:"rgba(41,38,27,.6)", lineHeight:1.5, marginBottom:4}}>
+            手紙・3カラム比較・草案v2が、語り手に応じて鍛え直されます。
+          </div>
+          <TweakSelect
+            label="Future Citizen"
+            value={t.voice}
+            options={[
+              { value: "hanako",  label: "田中花子 82歳 — 取り残される人" },
+              { value: "ren",     label: "佐藤蓮 24歳 — 直せる余白" },
+              { value: "misaki",  label: "小林美咲 41歳 — 決め続ける人" },
+            ]}
+            onChange={(v) => setTweak("voice", v)}
+          />
+
+          <TweakSection label="Stage Tempo"/>
+          <div style={{fontSize:10.5, color:"rgba(41,38,27,.6)", lineHeight:1.5, marginBottom:4}}>
+            手紙のフェード速度・データ列の表示間隔を制御。
+          </div>
+          <TweakRadio
+            label="Pace"
+            value={t.tempo}
+            options={["pitch","cinema","contemplative"]}
+            onChange={(v) => setTweak("tempo", v)}
+          />
+
+          <div style={{
+            marginTop: 6, padding: "10px 12px",
+            background: "rgba(0,0,0,0.04)", borderRadius: 8,
+            fontSize: 10.5, lineHeight: 1.6, color: "rgba(41,38,27,0.7)",
+          }}>
+            <b style={{display:"block", marginBottom:3, color:"#29261b"}}>合言葉</b>
+            手紙で泣かせるな。手紙で草案を変えろ。
+          </div>
+        </TweaksPanel>
       </div>
-
-      {showFab && (
-        <div className="nav-fab">
-          <button className="btn btn-ghost" onClick={prev} disabled={sceneIdx === 0}
-            style={{opacity: sceneIdx === 0 ? 0.4 : 1}}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M11 6H1M5 1L1 6l4 5" stroke="currentColor" strokeWidth="1.5"/></svg>
-            前へ
-          </button>
-          <button className="btn btn-primary" onClick={next} disabled={sceneIdx === SCENES.length - 1}
-            style={{opacity: sceneIdx === SCENES.length - 1 ? 0.4 : 1}}>
-            次のシーンへ
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M7 1l4 5-4 5" stroke="currentColor" strokeWidth="1.5"/></svg>
-          </button>
-        </div>
-      )}
-
-      <TweaksPanel>
-        <TweakSection label="Forge Intensity"/>
-        <div style={{fontSize:10.5, color:"rgba(41,38,27,.6)", lineHeight:1.5, marginBottom:4}}>
-          鍛冶場の熱量。火花密度・山稜の濃さ・赤橙のグロウを連動。
-        </div>
-        <TweakRadio
-          label="Heat"
-          value={t.intensity}
-          options={["quiet","balanced","blazing"]}
-          onChange={(v) => setTweak("intensity", v)}
-        />
-
-        <TweakSection label="2050年の語り手"/>
-        <div style={{fontSize:10.5, color:"rgba(41,38,27,.6)", lineHeight:1.5, marginBottom:4}}>
-          手紙・3カラム比較・草案v2が、語り手に応じて鍛え直されます。
-        </div>
-        <TweakSelect
-          label="Future Citizen"
-          value={t.voice}
-          options={[
-            { value: "hanako",  label: "田中花子 82歳 — 取り残される人" },
-            { value: "ren",     label: "佐藤蓮 24歳 — 直せる余白" },
-            { value: "misaki",  label: "小林美咲 41歳 — 決め続ける人" },
-          ]}
-          onChange={(v) => setTweak("voice", v)}
-        />
-
-        <TweakSection label="Stage Tempo"/>
-        <div style={{fontSize:10.5, color:"rgba(41,38,27,.6)", lineHeight:1.5, marginBottom:4}}>
-          手紙のフェード速度・データ列の表示間隔を制御。
-        </div>
-        <TweakRadio
-          label="Pace"
-          value={t.tempo}
-          options={["pitch","cinema","contemplative"]}
-          onChange={(v) => setTweak("tempo", v)}
-        />
-
-        <div style={{
-          marginTop: 6, padding: "10px 12px",
-          background: "rgba(0,0,0,0.04)", borderRadius: 8,
-          fontSize: 10.5, lineHeight: 1.6, color: "rgba(41,38,27,0.7)",
-        }}>
-          <b style={{display:"block", marginBottom:3, color:"#29261b"}}>合言葉</b>
-          手紙で泣かせるな。手紙で草案を変えろ。
-        </div>
-      </TweaksPanel>
-    </div>
+    </>
   );
 }
 
