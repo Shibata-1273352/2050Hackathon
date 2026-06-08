@@ -11,7 +11,7 @@ function AkagiBackground({ intensity }) {
   return (
     <div className="akagi-bg" aria-hidden="true">
       <div className="akagi-grid"/>
-      <svg viewBox="0 0 1600 600" preserveAspectRatio="xMidYEnd meet" style={{opacity: ridgeOpacity}}>
+      <svg viewBox="0 0 1600 600" preserveAspectRatio="xMidYMax meet" style={{opacity: ridgeOpacity}}>
         <defs>
           <linearGradient id="ridge" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#1a2548" stopOpacity="0"/>
